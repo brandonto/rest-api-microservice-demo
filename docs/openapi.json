@@ -1,0 +1,329 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "REST API for Demo",
+        "license": {
+            "name": "BSD-3-Clause",
+            "url": "https://opensource.org/license/BSD-3-Clause"
+        }
+    },
+    "paths": {
+        "/messages": {
+            "get": {
+                "summary": "List all messages",
+                "operationId": "listMessages",
+                "tags": [
+                    "messages"
+                ],
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "How many messages to return at one time (max 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "after_id",
+                        "in": "query",
+                        "description": "Show messages after a specified ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    },
+                    {
+                        "name": "detailed",
+                        "in": "query",
+                        "description": "Include metadata",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success: Returns a paged array of messages",
+                        "headers": {
+                            "x-next": {
+                                "description": "A link to the next page of messages",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Messages"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/DetailedMessages"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create a message",
+                "operationId": "createMessage",
+                "tags": [
+                    "messages"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Message"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success: Returns null response"
+                    },
+                    "default": {
+                        "description": "Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/messages/{messageId}": {
+            "get": {
+                "summary": "Get a specific message by ID",
+                "operationId": "getMessageById",
+                "tags": [
+                    "messages"
+                ],
+                "parameters": [
+                    {
+                        "name": "messageId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the message",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "detailed",
+                        "in": "query",
+                        "description": "Include metadata",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success: Returns specified message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Message"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/DetailedMessage"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a specific message by ID",
+                "operationId": "updateMessageById",
+                "tags": [
+                    "messages"
+                ],
+                "parameters": [
+                    {
+                        "name": "messageId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the message",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success: Returns null response"
+                    },
+                    "404": {
+                        "description": "Failure: Not found. Returns null response"
+                    },
+                    "default": {
+                        "description": "Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a specific message by ID",
+                "operationId": "deleteMessageById",
+                "tags": [
+                    "messages"
+                ],
+                "parameters": [
+                    {
+                        "name": "messageId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The ID of the message",
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success: Returns null response"
+                    },
+                    "404": {
+                        "description": "Failure: Not found. Returns null response"
+                    },
+                    "default": {
+                        "description": "Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Message": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "payload"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "payload": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DetailedMessage": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "metadata"
+                ],
+                "properties": {
+                    "message": {
+                        "$ref": "#/components/schemas/Message"
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "required": [
+                            "palindrome"
+                        ],
+                        "properties": {
+                            "palindrome": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            },
+            "Messages": {
+                "type": "array",
+                "maxItems": 100,
+                "items": {
+                    "$ref": "#/components/schemas/Message"
+                }
+            },
+            "DetailedMessages": {
+                "type": "array",
+                "maxItems": 100,
+                "items": {
+                    "$ref": "#/components/schemas/DetailedMessage"
+                }
+            },
+            "Error": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "message"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
