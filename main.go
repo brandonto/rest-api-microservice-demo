@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+    //"fmt"
+    "net/http"
+)
 
 func main() {
-    fmt.Println("Hello world!")
+    r := NewRouter()
+
+    http.ListenAndServe(":12345", r)
 }
