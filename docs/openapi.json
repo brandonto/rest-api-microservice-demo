@@ -106,6 +106,9 @@
                     "201": {
                         "description": "Success: Returns null response"
                     },
+                    "400": {
+                        "description": "Failure (Invalid Request): Returns null response"
+                    },
                     "default": {
                         "description": "Error",
                         "content": {

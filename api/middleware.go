@@ -29,14 +29,15 @@ func MessageCtx(next http.Handler) http.Handler {
             err = nil
         } else {
             // Bails out early with a 404 if messageId does not exist in the URL
-            // params.
+            // params - no response payload.
             //
 		    w.WriteHeader(http.StatusNotFound)
             return
         }
 
         if err != nil {
-            // Bails out early with a 404 if message does not exist.
+            // Bails out early with a 404 if message does not exist - no
+            // response payload.
             //
 		    w.WriteHeader(http.StatusNotFound)
             return
