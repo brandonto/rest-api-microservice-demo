@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
     "github.com/brandonto/rest-api-microservice-demo/db"
