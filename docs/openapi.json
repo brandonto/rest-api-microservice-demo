@@ -165,6 +165,9 @@
                             }
                         }
                     },
+                    "404": {
+                        "description": "Failure: Not found. Returns null response"
+                    },
                     "default": {
                         "description": "Error",
                         "content": {
@@ -195,6 +198,16 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Message"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "responses": {
                     "204": {
                         "description": "Success: Returns null response"
@@ -258,7 +271,6 @@
             "Message": {
                 "type": "object",
                 "required": [
-                    "id",
                     "payload"
                 ],
                 "properties": {

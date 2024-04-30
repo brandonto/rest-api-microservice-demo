@@ -1,17 +1,17 @@
-package main
+package model
 
 type Message struct {
     Id int64 `json:"id"`
     Payload string `json:"payload"`
 }
 
-type DetailedMessageMetadata struct {
+type MessageMetadata struct {
     Palindrome bool `json:"palindrome"`
 }
 
 type DetailedMessage struct {
     Message *Message `json:"message"`
-    Metadata *DetailedMessageMetadata `json:"metadata"`
+    Metadata *MessageMetadata `json:"metadata"`
 }
 
 type ModelError struct {

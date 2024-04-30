@@ -2,24 +2,39 @@ package main
 
 import (
     "net/http"
+
+    "github.com/brandonto/rest-api-microservice-demo/db"
+    //"github.com/brandonto/rest-api-microservice-demo/model"
+
+    //"github.com/go-chi/render"
 )
 
-func ListMessages(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("List"))
+func ListMessages(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
+    return func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("List"))
+    }
 }
 
-func CreateMessage(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Create"))
+func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
+    return func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("Create"))
+    }
 }
 
-func GetMessage(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Get"))
+func GetMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
+    return func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("Get"))
+    }
 }
 
-func UpdateMessage(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Update"))
+func UpdateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
+    return func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("Update"))
+    }
 }
 
-func DeleteMessage(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Delete"))
+func DeleteMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
+    return func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte("Delete"))
+    }
 }
