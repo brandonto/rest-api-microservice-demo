@@ -8,7 +8,7 @@ import (
     "github.com/go-chi/render"
 )
 
-func CreateRouter(svcDb *db.Db) chi.Router {
+func NewRouter(svcDb *db.Db) chi.Router {
     r := chi.NewRouter()
 
     r.Use(middleware.Logger)
