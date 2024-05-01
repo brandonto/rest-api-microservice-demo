@@ -124,17 +124,29 @@ func (db *Db) GetMessage(id uint64) (*model.DetailedMessage, error) {
     return detailedMessage, err
 }
 
-func (db *Db) UpdateMessage(message *model.DetailedMessage, id uint64) {
-    //return db.boltDb.Update(func(tx *bolt.Tx) error {
-    //    bucket := tx.Bucket([]byte(bucketName))
-    //    if bucket == nil {
-    //        // This shouldn't be possible as the bucket should have been created
-    //        // on initialization. Fundamental flaw in program operation... so
-    //        // lets just die
-    //        //
-    //        log.Fatal(errors.New("Irrecoverable state"))
-    //    }
-    //})
+func (db *Db) UpdateMessage(detailedMessage *model.DetailedMessage) error {
+    return db.boltDb.Update(func(tx *bolt.Tx) error {
+        bucket := tx.Bucket([]byte(bucketName))
+        if bucket == nil {
+            // This shouldn't be possible as the bucket should have been created
+            // on initialization. Fundamental flaw in program operation... so
+            // lets just die
+            //
+            log.Fatal(errors.New("Irrecoverable state"))
+        }
+
+        // Converts application data structure into message data blob
+        //
+        buf, err := json.Marshal(detailedMessage)
+        if err != nil {
+            return err
+        }
+
+        // Persists message data blob to database
+        //
+        id := detailedMessage.Message.Id
+        return bucket.Put(uint64ToBytes(id), buf)
+    })
 }
 
 func (db *Db) DeleteMessage(id uint64) error {

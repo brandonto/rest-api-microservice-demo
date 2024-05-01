@@ -7,3 +7,7 @@ import (
 type CreateMessageRequest struct {
     *model.Message
 }
+
+type PutMessageRequest struct {
+    *model.Message
+}
