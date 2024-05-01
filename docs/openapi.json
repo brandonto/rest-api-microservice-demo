@@ -109,6 +109,9 @@
                     "400": {
                         "description": "Failure (Invalid Request): Returns null response"
                     },
+                    "422": {
+                        "description": "Failure (Unprocessable): Returns null response"
+                    },
                     "default": {
                         "description": "Error",
                         "content": {
@@ -169,7 +172,7 @@
                         }
                     },
                     "404": {
-                        "description": "Failure: Not found. Returns null response"
+                        "description": "Failure (Not found): Returns null response"
                     },
                     "default": {
                         "description": "Error",
@@ -216,7 +219,10 @@
                         "description": "Success: Returns null response"
                     },
                     "404": {
-                        "description": "Failure: Not found. Returns null response"
+                        "description": "Failure (Not found): Returns null response"
+                    },
+                    "422": {
+                        "description": "Failure (Unprocessable): Returns null response"
                     },
                     "default": {
                         "description": "Error",
@@ -253,7 +259,10 @@
                         "description": "Success: Returns null response"
                     },
                     "404": {
-                        "description": "Failure: Not found. Returns null response"
+                        "description": "Failure (Not found): Returns null response"
+                    },
+                    "422": {
+                        "description": "Failure (Unprocessable): Returns null response"
                     },
                     "default": {
                         "description": "Error",
