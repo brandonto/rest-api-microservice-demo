@@ -19,7 +19,7 @@ func CreateRouter(svcDb *db.Db) chi.Router {
         r.Post("/", CreateMessage(svcDb))              // POST /messages
 
         r.Route("/{messageId}", func(r chi.Router) {
-            r.Use(MessageCtx)
+            r.Use(GetMessageCtxFunc(svcDb))
             r.Get("/", GetMessage(svcDb))              // GET /messages/{messageId}
             r.Put("/", UpdateMessage(svcDb))           // PUT /messages/{messageId}
             r.Delete("/", DeleteMessage(svcDb))        // DELETE /messages/{messageId}

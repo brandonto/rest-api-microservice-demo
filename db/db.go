@@ -2,6 +2,7 @@ package db
 
 import (
     "encoding/json"
+    "errors"
     "fmt"
     "log"
 
@@ -61,8 +62,17 @@ func (db *Db) Close() {
 func (db *Db) CreateMessage(detailedMessage *model.DetailedMessage) error {
     return db.boltDb.Update(func(tx *bolt.Tx) error {
         bucket := tx.Bucket([]byte(bucketName))
+        if bucket == nil {
+            // This shouldn't be possible as the bucket should have been created
+            // on initialization.
+            //
+            log.Fatal(errors.New("Irrecoverable state"))
+        }
 
-        id, _ := bucket.NextSequence()
+        id, err := bucket.NextSequence()
+        if err != nil {
+            return err
+        }
 
         message := detailedMessage.Message
         message.Id = id
@@ -72,22 +82,41 @@ func (db *Db) CreateMessage(detailedMessage *model.DetailedMessage) error {
             return err
         }
 
-        fmt.Println(detailedMessage)
-        fmt.Println(buf)
-
         return bucket.Put(uint64ToBytes(id), buf)
     })
 }
 
-func (db *Db) GetMessage(id int64) *model.DetailedMessage {
-    // TODO
-    return &model.DetailedMessage{nil, nil}
+func (db *Db) GetMessage(id uint64) (*model.DetailedMessage, error) {
+    detailedMessage := &model.DetailedMessage{}
+    err := db.boltDb.View(func(tx *bolt.Tx) error {
+        bucket := tx.Bucket([]byte(bucketName))
+        if bucket == nil {
+            // This shouldn't be possible as the bucket should have been created
+            // on initialization.
+            //
+            log.Fatal(errors.New("Irrecoverable state"))
+        }
+
+        buf := bucket.Get(uint64ToBytes(id))
+        if buf == nil {
+            return fmt.Errorf("Unable to retrieve message (id=%d) from database.", id)
+        }
+
+        err := json.Unmarshal(buf, detailedMessage)
+        if err != nil {
+            return err
+        }
+
+        return nil
+    })
+
+    return detailedMessage, err
 }
 
 func (db *Db) UpdateMessage(message *model.DetailedMessage) {
     // TODO
 }
 
-func (db *Db) DeleteMessage(id int64) {
+func (db *Db) DeleteMessage(id uint64) {
     // TODO
 }

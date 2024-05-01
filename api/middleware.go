@@ -3,7 +3,9 @@ package api
 import (
     "context"
     "net/http"
+    "strconv"
 
+    "github.com/brandonto/rest-api-microservice-demo/db"
     "github.com/brandonto/rest-api-microservice-demo/model"
 
     "github.com/go-chi/chi/v5"
@@ -19,33 +21,47 @@ func Paginate(next http.Handler) http.Handler {
 // Middleware to load message specified by ID {messageId} prior to processing.
 // Also bails out early with 404 Not Found if message does not exist.
 // 
-func MessageCtx(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        var message *model.Message
-        var err error
+func GetMessageCtxFunc(svcDb *db.Db) func(next http.Handler) http.Handler {
+    return func(next http.Handler) http.Handler {
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            var detailedMessage *model.DetailedMessage
 
-        if messageId := chi.URLParam(r, "messageId"); messageId != "" {
-            message = &model.Message{Id: 1, Payload: "test"}
-            err = nil
-        } else {
-            // Bails out early with a 404 if messageId does not exist in the URL
-            // params - no response payload.
+            if messageIdParam := chi.URLParam(r, "messageId"); messageIdParam != "" {
+
+                // Converts messageId URL param to a uint64 id
+                //
+                messageId, err := strconv.ParseUint(messageIdParam, 10, 64)
+                if err != nil {
+                    // Bails out early with a 400 if messageId in the URL params
+                    // is not an integer - no response payload.
+                    //
+                    w.WriteHeader(http.StatusBadRequest)
+                    return
+                }
+
+                // Retrieves message from the database
+                //
+                detailedMessage, err = svcDb.GetMessage(messageId)
+                if err != nil {
+                    // Bails out early with a 404 if message does not exist in
+                    // the database - no response payload.
+                    //
+                    w.WriteHeader(http.StatusNotFound)
+                    return
+                }
+            } else {
+                // Bails out early with a 404 if messageId does not exist in the
+                // URL params - no response payload.
+                //
+                w.WriteHeader(http.StatusBadRequest)
+                return
+            }
+
+            // Adds message to the request context and forward to next
+            // http.Handler
             //
-		    w.WriteHeader(http.StatusNotFound)
-            return
-        }
-
-        if err != nil {
-            // Bails out early with a 404 if message does not exist - no
-            // response payload.
-            //
-		    w.WriteHeader(http.StatusNotFound)
-            return
-        }
-
-        // Adds message to the request context and forward to next http.Handler
-        //
-        ctx := context.WithValue(r.Context(), "message", message)
-        next.ServeHTTP(w, r.WithContext(ctx))
-    })
+            ctx := context.WithValue(r.Context(), "detailedMessage", detailedMessage)
+            next.ServeHTTP(w, r.WithContext(ctx))
+        })
+    }
 }

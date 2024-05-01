@@ -3,6 +3,7 @@ package api
 import (
     //"fmt"
     "net/http"
+    "strings"
 
     "github.com/brandonto/rest-api-microservice-demo/db"
     "github.com/brandonto/rest-api-microservice-demo/model"
@@ -36,8 +37,7 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
         message := request.Message
         palindrome := isPalindrome(message.Payload)
         metadata := &model.MessageMetadata{Palindrome: palindrome}
-        detailedMessage := &model.DetailedMessage{Message: message,
-                                                  Metadata: metadata}
+        detailedMessage := &model.DetailedMessage{Message: message, Metadata: metadata}
 
         // Adds the message to the database
         //
@@ -50,24 +50,39 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 
         // Respond with status OK - no response payload
         //
-        w.WriteHeader(http.StatusOK)
+        w.WriteHeader(http.StatusCreated)
         return
     }
 }
 
 func GetMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
     return func(w http.ResponseWriter, r *http.Request) {
-        //w.Write([]byte("Get"))
-        message := r.Context().Value("message").(*model.Message)
-        metadata := &model.MessageMetadata{Palindrome: true}
-        detailedMessage := model.DetailedMessage{Message: message, Metadata: metadata}
+        detailed := false
+        if detailedQueryParam := r.URL.Query().Get("detailed"); detailedQueryParam != "" {
+            detailedQueryParam = strings.ToLower(detailedQueryParam)
+            if detailedQueryParam == "1" || detailedQueryParam == "true" {
+                detailed = true
+            } else if detailedQueryParam == "0" || detailedQueryParam == "false" {
+                detailed = false
+            } else {
+                // Respond with status Bad Request - no response payload
+                //
+                // TODO Do we need a payload here to indicate that query param
+                //      "detailed" is malformed?
+                //
+                w.WriteHeader(http.StatusBadRequest)
+                return
+            }
+        }
 
-        //render.JSON(w, r, message)
-        render.JSON(w, r, detailedMessage)
-        //if err := render.JSON(w, r, message); err != nil {
-        //    w.WriteHeader(http.StatusUnprocessableEntity)
-        //    return
-        //}
+        detailedMessage := r.Context().Value("detailedMessage").(*model.DetailedMessage)
+        render.Status(r, http.StatusOK)
+        if detailed {
+            render.JSON(w, r, detailedMessage)
+        } else {
+            message := detailedMessage.Message
+            render.JSON(w, r, message)
+        }
     }
 }
 
