@@ -24,18 +24,21 @@
                         "required": false,
                         "schema": {
                             "type": "integer",
+                            "default": 20,
+                            "minimum": 0,
                             "maximum": 100,
-                            "format": "int32"
+                            "format": "uint64"
                         }
                     },
                     {
-                        "name": "after_id",
+                        "name": "afterId",
                         "in": "query",
                         "description": "Show messages after a specified ID",
                         "required": false,
                         "schema": {
                             "type": "integer",
-                            "format": "int32"
+                            "default": 0,
+                            "format": "uint64"
                         }
                     },
                     {
@@ -44,7 +47,8 @@
                         "description": "Include metadata",
                         "required": false,
                         "schema": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 ],
@@ -52,8 +56,8 @@
                     "200": {
                         "description": "Success: Returns a paged array of messages",
                         "headers": {
-                            "x-next": {
-                                "description": "A link to the next page of messages",
+                            "x-next-relative-url": {
+                                "description": "A relative URL for the next page of messages",
                                 "schema": {
                                     "type": "string"
                                 }
@@ -73,6 +77,12 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Failure (Invalid Request): Returns null response"
+                    },
+                    "422": {
+                        "description": "Failure (Unprocessable): Returns null response"
                     },
                     "default": {
                         "description": "Error",
@@ -149,7 +159,8 @@
                         "description": "Include metadata",
                         "required": false,
                         "schema": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 ],

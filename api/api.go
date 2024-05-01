@@ -3,7 +3,7 @@ package api
 import (
     //"fmt"
     "net/http"
-    "strings"
+    "strconv"
 
     "github.com/brandonto/rest-api-microservice-demo/db"
     "github.com/brandonto/rest-api-microservice-demo/model"
@@ -13,7 +13,58 @@ import (
 
 func ListMessages(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
     return func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("List"))
+        // Retrieve pagination query params from context
+        //
+        detailed := r.Context().Value("detailed").(bool)
+        limit := r.Context().Value("limit").(uint64)
+        afterId := r.Context().Value("afterId").(uint64)
+
+        detailedMessages, nextAfterId, err := svcDb.ListMessages(limit, afterId + 1)
+        if err != nil {
+            // Something went wrong with a batch get... respond with status
+            // Unprocessable content - no response payload
+            //
+            w.WriteHeader(http.StatusUnprocessableEntity)
+            return
+        }
+
+        // If there are further message to retrieve from the database, we'll
+        // return a relative URL for the next page of messages in an HTTP header
+        //
+        if nextAfterId != 0 {
+            // Start with the afterId
+            //
+            nextRelativeUrl := r.URL.Path + "?afterId=" + strconv.FormatUint(nextAfterId, 10)
+
+            // "limit" will always have a value, we assign a default value if
+            // one wasn't included in the HTTP request
+            //
+            nextRelativeUrl = nextRelativeUrl + "+limit=" + strconv.FormatUint(limit, 10)
+
+            // "detailed" defaults to false, so we add the query param only if
+            // it was set to true
+            //
+            if detailed {
+                nextRelativeUrl += "+detailed=true"
+            }
+	        w.Header().Set("x-next-relative-url", nextRelativeUrl)
+        }
+
+        // Response with status OK - response payload depends on the "detailed"
+        // query param
+        //
+        render.Status(r, http.StatusOK)
+        if detailed {
+            render.JSON(w, r, detailedMessages)
+        } else {
+            // Transform array of DetailedMessages into array of Messages
+            //
+            var messages []*model.Message
+            for _, v := range detailedMessages {
+                messages = append(messages, v.Message)
+            }
+            render.JSON(w, r, messages)
+        }
     }
 }
 
@@ -32,7 +83,7 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 
         // Transform the Message received in the request into a DetailedMessage
         // to store in the database. The "id" field of the message will be
-        // ignored
+        // ignored in the database layer
         //
         message := request.Message
         palindrome := isPalindrome(message.Payload)
@@ -57,17 +108,14 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 
 func GetMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
     return func(w http.ResponseWriter, r *http.Request) {
-        detailed := false
+        var err error
 
         // A missing "detailed" query param is treated as it being false
         //
+        detailed := GetMessageDetailedQueryParamDefault
         if detailedQueryParam := r.URL.Query().Get("detailed"); detailedQueryParam != "" {
-            detailedQueryParam = strings.ToLower(detailedQueryParam)
-            if detailedQueryParam == "1" || detailedQueryParam == "true" {
-                detailed = true
-            } else if detailedQueryParam == "0" || detailedQueryParam == "false" {
-                detailed = false
-            } else {
+            detailed, err = stringToBool(detailedQueryParam)
+            if err != nil {
                 // Respond with status Bad Request - no response payload
                 //
                 // TODO Do we need a payload here to indicate that query param
