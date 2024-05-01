@@ -29,12 +29,24 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
             return
         }
 
+        // Transform the Message received in the request into a DetailedMessage
+        // to store in the database. The "id" field of the message will be
+        // ignoredk
+        //
         message := request.Message
         palindrome := isPalindrome(message.Payload)
         metadata := &model.MessageMetadata{Palindrome: palindrome}
         detailedMessage := &model.DetailedMessage{Message: message,
                                                   Metadata: metadata}
-        svcDb.CreateMessage(detailedMessage)
+
+        // Adds the message to the database
+        //
+        if err := svcDb.CreateMessage(detailedMessage); err != nil {
+            // Respond with status Unprocessable content - no response payload
+            //
+            w.WriteHeader(http.StatusUnprocessableEntity)
+            return
+        }
 
         // Respond with status OK - no response payload
         //
@@ -45,7 +57,17 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 
 func GetMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
     return func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("Get"))
+        //w.Write([]byte("Get"))
+        message := r.Context().Value("message").(*model.Message)
+        metadata := &model.MessageMetadata{Palindrome: true}
+        detailedMessage := model.DetailedMessage{Message: message, Metadata: metadata}
+
+        //render.JSON(w, r, message)
+        render.JSON(w, r, detailedMessage)
+        //if err := render.JSON(w, r, message); err != nil {
+        //    w.WriteHeader(http.StatusUnprocessableEntity)
+        //    return
+        //}
     }
 }
 

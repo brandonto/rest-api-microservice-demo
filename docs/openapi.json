@@ -137,7 +137,7 @@
                         "description": "The ID of the message",
                         "schema": {
                             "type": "integer",
-                            "format": "int64"
+                            "format": "uint64"
                         }
                     },
                     {
@@ -197,7 +197,7 @@
                         "description": "The ID of the message",
                         "schema": {
                             "type": "integer",
-                            "format": "int64"
+                            "format": "uint64"
                         }
                     }
                 ],
@@ -244,7 +244,7 @@
                         "description": "The ID of the message",
                         "schema": {
                             "type": "integer",
-                            "format": "int64"
+                            "format": "uint64"
                         }
                     }
                 ],
@@ -279,7 +279,7 @@
                 "properties": {
                     "id": {
                         "type": "integer",
-                        "format": "int64"
+                        "format": "uint64"
                     },
                     "payload": {
                         "type": "string"

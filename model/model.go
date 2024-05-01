@@ -1,7 +1,7 @@
 package model
 
 type Message struct {
-    Id int64 `json:"id"`
+    Id uint64 `json:"id"`
     Payload string `json:"payload"`
 }
 
