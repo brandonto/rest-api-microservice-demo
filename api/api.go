@@ -141,9 +141,9 @@ func DeleteMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
             return
         }
 
-        // Respond with status OK - no response payload
+        // Respond with status No Content - no response payload
         //
-        w.WriteHeader(http.StatusCreated)
+        w.WriteHeader(http.StatusNoContent)
         return
     }
 }
