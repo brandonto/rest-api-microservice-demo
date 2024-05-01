@@ -58,6 +58,9 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 func GetMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
     return func(w http.ResponseWriter, r *http.Request) {
         detailed := false
+
+        // A missing "detailed" query param is treated as it being false
+        //
         if detailedQueryParam := r.URL.Query().Get("detailed"); detailedQueryParam != "" {
             detailedQueryParam = strings.ToLower(detailedQueryParam)
             if detailedQueryParam == "1" || detailedQueryParam == "true" {
@@ -75,13 +78,15 @@ func GetMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
             }
         }
 
+        // Response with status OK - response payload depends on the "detailed"
+        // query param
+        //
         detailedMessage := r.Context().Value("detailedMessage").(*model.DetailedMessage)
         render.Status(r, http.StatusOK)
         if detailed {
             render.JSON(w, r, detailedMessage)
         } else {
-            message := detailedMessage.Message
-            render.JSON(w, r, message)
+            render.JSON(w, r, detailedMessage.Message)
         }
     }
 }
@@ -94,6 +99,19 @@ func UpdateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 
 func DeleteMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
     return func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("Delete"))
+        detailedMessage := r.Context().Value("detailedMessage").(*model.DetailedMessage)
+        messageId := detailedMessage.Message.Id
+
+        if err := svcDb.DeleteMessage(messageId); err != nil {
+            // Respond with status Unprocessable content - no response payload
+            //
+            w.WriteHeader(http.StatusUnprocessableEntity)
+            return
+        }
+
+        // Respond with status OK - no response payload
+        //
+        w.WriteHeader(http.StatusCreated)
+        return
     }
 }

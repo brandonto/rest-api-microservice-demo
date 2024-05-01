@@ -64,24 +64,30 @@ func (db *Db) CreateMessage(detailedMessage *model.DetailedMessage) error {
         bucket := tx.Bucket([]byte(bucketName))
         if bucket == nil {
             // This shouldn't be possible as the bucket should have been created
-            // on initialization.
+            // on initialization. Fundamental flaw in program operation... so
+            // lets just die
             //
             log.Fatal(errors.New("Irrecoverable state"))
         }
 
+        // Get the next unique integer identifier from the database to use as
+        // the message ID and database key
+        //
         id, err := bucket.NextSequence()
         if err != nil {
             return err
         }
+        detailedMessage.Message.Id = id
 
-        message := detailedMessage.Message
-        message.Id = id
-
+        // Converts application data structure into message data blob
+        //
         buf, err := json.Marshal(detailedMessage)
         if err != nil {
             return err
         }
 
+        // Persists message data blob to database
+        //
         return bucket.Put(uint64ToBytes(id), buf)
     })
 }
@@ -92,16 +98,21 @@ func (db *Db) GetMessage(id uint64) (*model.DetailedMessage, error) {
         bucket := tx.Bucket([]byte(bucketName))
         if bucket == nil {
             // This shouldn't be possible as the bucket should have been created
-            // on initialization.
+            // on initialization. Fundamental flaw in program operation... so
+            // lets just die
             //
             log.Fatal(errors.New("Irrecoverable state"))
         }
 
+        // Retrieves message data blob from database
+        //
         buf := bucket.Get(uint64ToBytes(id))
         if buf == nil {
             return fmt.Errorf("Unable to retrieve message (id=%d) from database.", id)
         }
 
+        // Converts message data blob into application data structure
+        //
         err := json.Unmarshal(buf, detailedMessage)
         if err != nil {
             return err
@@ -113,10 +124,37 @@ func (db *Db) GetMessage(id uint64) (*model.DetailedMessage, error) {
     return detailedMessage, err
 }
 
-func (db *Db) UpdateMessage(message *model.DetailedMessage) {
-    // TODO
+func (db *Db) UpdateMessage(message *model.DetailedMessage, id uint64) {
+    //return db.boltDb.Update(func(tx *bolt.Tx) error {
+    //    bucket := tx.Bucket([]byte(bucketName))
+    //    if bucket == nil {
+    //        // This shouldn't be possible as the bucket should have been created
+    //        // on initialization. Fundamental flaw in program operation... so
+    //        // lets just die
+    //        //
+    //        log.Fatal(errors.New("Irrecoverable state"))
+    //    }
+    //})
 }
 
-func (db *Db) DeleteMessage(id uint64) {
-    // TODO
+func (db *Db) DeleteMessage(id uint64) error {
+    return db.boltDb.Update(func(tx *bolt.Tx) error {
+        bucket := tx.Bucket([]byte(bucketName))
+        if bucket == nil {
+            // This shouldn't be possible as the bucket should have been created
+            // on initialization. Fundamental flaw in program operation... so
+            // lets just die
+            //
+            log.Fatal(errors.New("Irrecoverable state"))
+        }
+
+        // Deletes message data blob from database
+        //
+        err := bucket.Delete(uint64ToBytes(id))
+        if err != nil {
+            return fmt.Errorf("Unable to delete message (id=%d) from database.", id)
+        }
+
+        return nil
+    })
 }
