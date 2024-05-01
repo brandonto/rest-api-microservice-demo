@@ -11,7 +11,8 @@ import (
     bolt "go.etcd.io/bbolt"
 )
 
-// Structure to abtract away the underlying database implementation
+// Structure to abtract away the underlying database implementation. This is the
+// main handle into the database.
 //
 type Db struct {
     boltDb    *bolt.DB
@@ -19,6 +20,8 @@ type Db struct {
     Config
 }
 
+// Structure to encapsulate configuration needed to initialize the Db
+//
 type Config struct {
     FilePath string
     BucketName string

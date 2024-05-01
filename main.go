@@ -16,6 +16,7 @@ const serverAddr = ":12345"
 
 func main() {
     // Create and configure Db
+    //
     dbCfg := db.Config{dbFile, dbBucketName}
     svcDb := db.NewDb(dbCfg)
 

@@ -11,9 +11,19 @@ import (
 func NewRouter(svcDb *db.Db) chi.Router {
     r := chi.NewRouter()
 
+    // Use go-chi's built in Logger middleware to enable lightweight logging of
+    // HTTP requests and responses
+    //
     r.Use(middleware.Logger)
+
+    // All HTTP responses in this API with a payload is JSON formatted. This is
+    // still safe for empty HTTP responses because empty responses in this
+    // application doesn't go through go-chi's render package.
+    //
     r.Use(render.SetContentType(render.ContentTypeJSON))
 
+    // Configure API routes
+    //
     r.Route("/messages", func(r chi.Router) {
         r.With(Paginate).Get("/", ListMessages(svcDb)) // GET /messages
         r.Post("/", CreateMessage(svcDb))              // POST /messages
