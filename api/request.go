@@ -1,7 +1,7 @@
 package api
 
 import (
-    "github.com/brandonto/rest-api-microservice-demo/model"
+	"github.com/brandonto/rest-api-microservice-demo/model"
 )
 
 // ListMessagesRequest
@@ -14,20 +14,17 @@ const ListMessagesAfterIdQueryParamDefault = uint64(0)
 
 const ListMessagesDetailedQueryParamDefault = false
 
-
 // CreateMessageRequest
 //
 type CreateMessageRequest struct {
-    *model.Message
+	*model.Message
 }
-
 
 // GetMessageRequest
 const GetMessageDetailedQueryParamDefault = false
 
-
 // PutMessageRequest
 //
 type PutMessageRequest struct {
-    *model.Message
+	*model.Message
 }
