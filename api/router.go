@@ -8,13 +8,15 @@ import (
     "github.com/go-chi/render"
 )
 
-func NewRouter(svcDb *db.Db) chi.Router {
+func NewRouter(svcDb *db.Db, enableLogger bool) chi.Router {
     r := chi.NewRouter()
 
     // Use go-chi's built in Logger middleware to enable lightweight logging of
     // HTTP requests and responses
     //
-    r.Use(middleware.Logger)
+    if enableLogger {
+        r.Use(middleware.Logger)
+    }
 
     // All HTTP responses in this API with a payload is JSON formatted. This is
     // still safe for empty HTTP responses because empty responses in this
