@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"log"
+	"syscall"
 	"testing"
 	"time"
 
@@ -16,19 +17,28 @@ import (
 
 type EndToEndTestSuite struct {
 	suite.Suite
-	dbFilePath  string
-	dbBucketKey []byte
-	port        uint64
+	dbFilePath   string
+	dbBucketName string
+	dbBucketKey  []byte
+	port         uint64
 }
 
+// One time set up function called when the test suite is started
+//
 func (suite *EndToEndTestSuite) SetupSuite() {
-	// Configure suite
-	//
 	suite.dbFilePath = "/home/brandonto/rest-api-microservice-demo.db"
-	dbBucketName := "E2ETestBucket"
-	suite.dbBucketKey = []byte(dbBucketName)
+	suite.dbBucketName = "E2ETestBucket"
+	suite.dbBucketKey = []byte(suite.dbBucketName)
 	suite.port = 54321
+}
 
+func (suite *EndToEndTestSuite) TearDownSuite() {
+	// This function stub is here to make explicit that it was considered but
+	// deemed unecessary to include any logic.
+	//
+}
+
+func (suite *EndToEndTestSuite) SetupTest() {
 	// Purges any previous data left in the bucket
 	//
 	boltDb, err := bolt.Open(suite.dbFilePath, 0600, nil)
@@ -49,14 +59,40 @@ func (suite *EndToEndTestSuite) SetupSuite() {
 	}
 	boltDb.Close()
 
-	// Run server in a seperate goroutine
+	// Configure and run server in a seperate goroutine
 	//
-	dbCfg := db.Config{suite.dbFilePath, dbBucketName}
-	coreCfg := core.Config{dbCfg, suite.port, true}
+	dbCfg := db.Config{
+		FilePath:   suite.dbFilePath,
+		BucketName: suite.dbBucketName,
+	}
+
+	coreCfg := core.Config{
+		DbCfg:        dbCfg,
+		Port:         suite.port,
+		EnableLogger: true,
+		Standalone:   false,
+	}
+
 	go core.Run(coreCfg)
 
-	fmt.Println("[TEST] Server started.")
-	time.Sleep(10 * time.Second)
+	// Gives a bit of breathing room to allow the server to start up
+	//
+	time.Sleep(1 * time.Second)
+}
+
+func (suite *EndToEndTestSuite) TearDownTest() {
+	// SIGUSR1 is sent to a channel owned by the goroutine running the core. This
+	// signal performs a graceful shutdown of the server.
+	//
+	err := syscall.Kill(syscall.Getpid(), syscall.SIGUSR1)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Gives a bit of breathing room to allow the server to shut down
+	//
+	sleepTimeInSeconds := core.ServerShutdownTimeoutInSeconds + 1
+	time.Sleep(time.Duration(sleepTimeInSeconds) * time.Second)
 }
 
 func (suite *EndToEndTestSuite) TestSomething() {

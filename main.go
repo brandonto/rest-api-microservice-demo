@@ -50,9 +50,19 @@ func main() {
 		dbBucketName = os.Args[3]
 	}
 
-	// Run the application
+	// Configure and run the application
 	//
-	dbCfg := db.Config{dbFile, dbBucketName}
-	coreCfg := core.Config{DbCfg: dbCfg, Port: port, EnableLogger: true}
+	dbCfg := db.Config{
+		FilePath:   dbFile,
+		BucketName: dbBucketName,
+	}
+
+	coreCfg := core.Config{
+		DbCfg:        dbCfg,
+		Port:         port,
+		EnableLogger: true,
+		Standalone:   true,
+	}
+
 	core.Run(coreCfg)
 }

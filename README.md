@@ -10,3 +10,11 @@ Running
 usage: ./rest-api-microservice-demo db_path [port] [db_bucket_name]
 ```
 
+Testing
+=======
+
+E2E Test Suite
+```bash
+cd test
+go test
+```
