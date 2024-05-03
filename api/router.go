@@ -16,7 +16,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-func NewRouter(svcDb *db.Db, enableLogger bool) chi.Router {
+func NewRouter(svcDb *db.Db, enableLogger bool, standalone bool) chi.Router {
 	r := chi.NewRouter()
 
 	// Use go-chi's built in Logger middleware to enable lightweight logging of
@@ -32,24 +32,29 @@ func NewRouter(svcDb *db.Db, enableLogger bool) chi.Router {
 	//
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	// Reads openapi.json
+	// These swagger UI routes don't need to be configured when running the core
+	// application in test suites
 	//
-	openApiFileBytes, err := ioutil.ReadFile("docs/openapi.json")
-	if err != nil {
-		log.Fatal(errors.New("Unable to open openapi.json file"))
+	if standalone {
+		// Reads openapi.json
+		//
+		openApiFileBytes, err := ioutil.ReadFile("docs/openapi.json")
+		if err != nil {
+			log.Fatal(errors.New("Unable to open openapi.json file"))
+		}
+
+		// GET /openapi.json
+		//
+		r.Get("/openapi.json", func(w http.ResponseWriter, r *http.Request) {
+			w.Write(openApiFileBytes)
+		})
+
+		// GET /swagger
+		//
+		workDir, _ := os.Getwd()
+		htmlDir := http.Dir(filepath.Join(workDir, "html"))
+		FileServer(r, "/swagger", htmlDir)
 	}
-
-	// GET /openapi.json
-	//
-	r.Get("/openapi.json", func (w http.ResponseWriter, r *http.Request) {
-		w.Write(openApiFileBytes)
-	})
-
-	// GET /swagger
-	//
-	workDir, _ := os.Getwd()
-	htmlDir := http.Dir(filepath.Join(workDir, "html"))
-	FileServer(r, "/swagger", htmlDir)
 
 	// Configure API routes
 	//

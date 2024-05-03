@@ -243,7 +243,8 @@ func (db *Db) DeleteMessage(id uint64) error {
 			log.Fatal(errors.New("Irrecoverable state"))
 		}
 
-		// Deletes message data blob from database
+		// Deletes message data blob from database. A nil error is returned if
+		// there is nothing to be deleted.
 		//
 		err := bucket.Delete(uint64ToBytes(id))
 		if err != nil {

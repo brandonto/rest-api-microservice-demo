@@ -40,7 +40,7 @@ func Run(coreCfg Config) {
 
 	// Set up HTTP routes
 	//
-	router := api.NewRouter(svcDb, coreCfg.EnableLogger)
+	router := api.NewRouter(svcDb, coreCfg.EnableLogger, coreCfg.Standalone)
 
 	// Create and configure the server and start accepting connections
 	//
