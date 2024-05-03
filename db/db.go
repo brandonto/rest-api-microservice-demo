@@ -257,7 +257,7 @@ func (db *Db) DeleteMessage(id uint64) error {
 // Delete all Messages from the database. Fast way of doing so is to just delete
 // and re create the bucket.
 //
-// This function isn't called in the main application. It's created to be called
+// This function isn't called in the core application. It's created to be called
 // by the unit testing code.
 //
 func (db *Db) ClearMessages() error {

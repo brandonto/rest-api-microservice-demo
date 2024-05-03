@@ -13,8 +13,3 @@ type DetailedMessage struct {
 	Message  *Message         `json:"message"`
 	Metadata *MessageMetadata `json:"metadata"`
 }
-
-type ModelError struct {
-	Code    int32  `json:"code"`
-	Message string `json:"message"`
-}

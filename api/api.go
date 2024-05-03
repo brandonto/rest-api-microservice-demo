@@ -118,9 +118,6 @@ func GetMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				// Respond with status Bad Request - no response payload
 				//
-				// TODO Do we need a payload here to indicate that query param
-				//      "detailed" is malformed?
-				//
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}

@@ -83,16 +83,6 @@
                     },
                     "422": {
                         "description": "Failure (Unprocessable): Returns null response"
-                    },
-                    "default": {
-                        "description": "Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
                     }
                 }
             },
@@ -121,16 +111,6 @@
                     },
                     "422": {
                         "description": "Failure (Unprocessable): Returns null response"
-                    },
-                    "default": {
-                        "description": "Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -184,16 +164,6 @@
                     },
                     "404": {
                         "description": "Failure (Not found): Returns null response"
-                    },
-                    "default": {
-                        "description": "Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
                     }
                 }
             },
@@ -234,16 +204,6 @@
                     },
                     "422": {
                         "description": "Failure (Unprocessable): Returns null response"
-                    },
-                    "default": {
-                        "description": "Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
                     }
                 }
             },
@@ -274,16 +234,6 @@
                     },
                     "422": {
                         "description": "Failure (Unprocessable): Returns null response"
-                    },
-                    "default": {
-                        "description": "Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -341,22 +291,6 @@
                 "maxItems": 100,
                 "items": {
                     "$ref": "#/components/schemas/DetailedMessage"
-                }
-            },
-            "Error": {
-                "type": "object",
-                "required": [
-                    "code",
-                    "message"
-                ],
-                "properties": {
-                    "code": {
-                        "type": "integer",
-                        "format": "int32"
-                    },
-                    "message": {
-                        "type": "string"
-                    }
                 }
             }
         }
