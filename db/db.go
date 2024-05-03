@@ -63,9 +63,9 @@ func (db *Db) Close() {
 	db.boltDb.Close()
 }
 
-// Returns a list of "limit" number of DetailedMessages starting index "id" and
-// the next "afterId" to if applicable. A returned "afterId" of 0 indicates that
-// there are no more messages to retrieve from the database
+// Returns a list of up to "limit" number of DetailedMessage starting with the
+// first entry from index "id". A non-0 "afterId" returned indicates that there
+// are more messages left to retrieve from the database.
 //
 func (db *Db) ListMessages(limit uint64, id uint64) ([]*model.DetailedMessage, uint64, error) {
 	var detailedMessages []*model.DetailedMessage
@@ -127,6 +127,10 @@ func (db *Db) ListMessages(limit uint64, id uint64) ([]*model.DetailedMessage, u
 	return detailedMessages, afterId, err
 }
 
+// Inserts a new DetailedMessage in the database using "detailedMessage" at the
+// index specified in the message. Returns an error if something went wrong
+// during the transaction.
+//
 func (db *Db) CreateMessage(detailedMessage *model.DetailedMessage) error {
 	return db.boltDb.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(db.bucketKey)
@@ -160,6 +164,9 @@ func (db *Db) CreateMessage(detailedMessage *model.DetailedMessage) error {
 	})
 }
 
+// Retrieves a DetailedMessage from the database at index "id". Returns an error
+// if something went wrong during the transaction.
+//
 func (db *Db) GetMessage(id uint64) (*model.DetailedMessage, error) {
 	detailedMessage := &model.DetailedMessage{}
 
@@ -193,6 +200,10 @@ func (db *Db) GetMessage(id uint64) (*model.DetailedMessage, error) {
 	return detailedMessage, err
 }
 
+// Replaces a DetailedMessage in the database with "detailedMessage" at the
+// index specified in the message. Returns an error if something went wrong
+// during the transaction.
+//
 func (db *Db) UpdateMessage(detailedMessage *model.DetailedMessage) error {
 	return db.boltDb.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(db.bucketKey)
@@ -218,6 +229,9 @@ func (db *Db) UpdateMessage(detailedMessage *model.DetailedMessage) error {
 	})
 }
 
+// Deletes a DetailedMessage from the database at index "id". Returns an error
+// if something went wrong during the transaction.
+//
 func (db *Db) DeleteMessage(id uint64) error {
 	return db.boltDb.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket(db.bucketKey)
@@ -234,6 +248,28 @@ func (db *Db) DeleteMessage(id uint64) error {
 		err := bucket.Delete(uint64ToBytes(id))
 		if err != nil {
 			return fmt.Errorf("Unable to delete message (id=%d) from database.", id)
+		}
+
+		return nil
+	})
+}
+
+// Delete all Messages from the database. Fast way of doing so is to just delete
+// and re create the bucket.
+//
+// This function isn't called in the main application. It's created to be called
+// by the unit testing code.
+//
+func (db *Db) ClearMessages() error {
+	return db.boltDb.Update(func(tx *bolt.Tx) error {
+		err := tx.DeleteBucket(db.bucketKey)
+		if err != nil && err != bolt.ErrBucketNotFound {
+			return err
+		}
+
+		_, err = tx.CreateBucket(db.bucketKey)
+		if err != nil {
+			return err
 		}
 
 		return nil

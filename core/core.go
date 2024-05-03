@@ -32,5 +32,5 @@ func Run(coreCfg Config) {
 	//
 	router := api.NewRouter(svcDb, coreCfg.EnableLogger)
 	portStr := strconv.FormatUint(coreCfg.Port, 10)
-	http.ListenAndServe(":"+portStr, router)
+	http.ListenAndServe("localhost:"+portStr, router)
 }
