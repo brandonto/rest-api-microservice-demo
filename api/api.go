@@ -39,13 +39,13 @@ func ListMessages(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 			// "limit" will always have a value, we assign a default value if
 			// one wasn't included in the HTTP request
 			//
-			nextRelativeUrl = nextRelativeUrl + "+limit=" + strconv.FormatUint(limit, 10)
+			nextRelativeUrl = nextRelativeUrl + "&limit=" + strconv.FormatUint(limit, 10)
 
 			// "detailed" defaults to false, so we add the query param only if
 			// it was set to true
 			//
 			if detailed {
-				nextRelativeUrl += "+detailed=true"
+				nextRelativeUrl += "&detailed=true"
 			}
 			w.Header().Set("x-next-relative-url", nextRelativeUrl)
 		}
@@ -74,7 +74,7 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 
 		// Parse and validate the request
 		//
-		if err := render.Decode(r, request); err != nil {
+		if err := render.Bind(r, request); err != nil {
 			// Respond with status Bad Request - no response payload
 			//
 			w.WriteHeader(http.StatusBadRequest)
@@ -88,7 +88,10 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 		message := request.Message
 		palindrome := isPalindrome(message.Payload)
 		metadata := &model.MessageMetadata{Palindrome: palindrome}
-		detailedMessage := &model.DetailedMessage{Message: message, Metadata: metadata}
+		detailedMessage := &model.DetailedMessage{
+			Message: message,
+			Metadata: metadata,
+		}
 
 		// Adds the message to the database
 		//
@@ -142,7 +145,7 @@ func UpdateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 
 		// Parse and validate the request
 		//
-		if err := render.Decode(r, request); err != nil {
+		if err := render.Bind(r, request); err != nil {
 			// Respond with status Bad Request - no response payload
 			//
 			w.WriteHeader(http.StatusBadRequest)
