@@ -89,7 +89,7 @@ func CreateMessage(svcDb *db.Db) func(w http.ResponseWriter, r *http.Request) {
 		palindrome := isPalindrome(message.Payload)
 		metadata := &model.MessageMetadata{Palindrome: palindrome}
 		detailedMessage := &model.DetailedMessage{
-			Message: message,
+			Message:  message,
 			Metadata: metadata,
 		}
 

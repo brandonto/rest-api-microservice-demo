@@ -109,7 +109,7 @@ func (suite *EndToEndTestSuite) TearDownTest() {
 }
 
 func (suite *EndToEndTestSuite) makeRequestURL(path string) string {
-	 return fmt.Sprintf("http://localhost:%d%s", suite.port, path)
+	return fmt.Sprintf("http://localhost:%d%s", suite.port, path)
 }
 
 func (suite *EndToEndTestSuite) TestBasicFunctionality() {
