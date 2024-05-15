@@ -37,8 +37,20 @@ The RESTful API is described in an OpenAPI 3.0 document found here: ([openapi.js
 Running
 =======
 
-```bash
-usage: ./rest-api-microservice-demo db_path [port] [db_bucket_name]
+**Native**
+```sh
+go run main.go
+```
+
+**Docker**
+```sh
+docker build -t rest-api-microservice-demo .
+docker run -p ${PORT}:${PORT} rest-api-microservice-demo
+```
+
+**Docker Compose**
+```sh
+docker-compose up --build
 ```
 
 Testing
