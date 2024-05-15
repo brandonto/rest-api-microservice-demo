@@ -1,0 +1,9 @@
+services:
+  go-service:
+    build: .
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - BUCKET=${BUCKET}
+      - PORT=${PORT}
+      - DB_PATH=${DB_PATH}
